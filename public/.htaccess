@@ -1,0 +1,56 @@
+# Habilitar Rewrite Engine para URLs amigáveis
+RewriteEngine On
+
+# Redirecionar todas as requisições para index.php, exceto arquivos existentes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+
+# Bloquear acesso direto a pastas sensíveis
+<FilesMatch "^(conexao\.php|config\.php|constantes\.php|sessao\.php)">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Proteger diretórios sensíveis
+<Directory "/app/DB">
+    Order Deny,Allow
+    Deny from all
+</Directory>
+
+# Impedir listagem de diretórios
+Options -Indexes
+
+# Proteger uploads para não executarem PHP
+<Directory "/app/uploads">
+    <FilesMatch "\.(php|php5|sh|pl|cgi|exe)$">
+        Order Deny,Allow
+        Deny from all
+    </FilesMatch>
+</Directory>
+
+# Definir index.php como página inicial
+DirectoryIndex index.php
+
+# Proteção contra hotlinking de imagens
+RewriteCond %{HTTP_REFERER} !^$
+RewriteCond %{HTTP_REFERER} !^https://(www\.)?seusite\.com/ [NC]
+RewriteRule \.(jpg|jpeg|png|gif)$ - [F]
+
+# Configuração de cache para melhorar desempenho
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    ExpiresByType application/x-javascript "access plus 1 month"
+</IfModule>
+
+# Compressão Gzip para otimizar carregamento
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>

@@ -1,0 +1,444 @@
+create database sist_quiz;
+use sist_quiz;
+drop database sist_quiz;
+-- 🎯 Estrutura do Banco de Dados para o Quiz
+-- Tabela de Usuários
+SELECT * FROM usuarios;
+🎯 Estrutura do Banco de Dados para o Quiz
+
+-- Tabela de Usuários
+CREATE TABLE usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    senha VARCHAR(255) NOT NULL,
+    tipo ENUM('professor', 'aluno') NOT NULL,
+    ativo TINYINT(1) DEFAULT 1, -- 1 para ativo, 0 para inativo
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+📌 Criar uma Tabela para Recuperação de Senha (Opcional)
+Se quiser um sistema de recuperação de senha com tokens, podemos criar uma tabela separada para isso:
+
+CREATE TABLE recuperacao_senha (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    token VARCHAR(255) NOT NULL,
+    expiracao DATETIME NOT NULL,
+    usado TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+-- Tabela de Eventos (Quizzes Criados pelos Professores)
+CREATE TABLE eventos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    professor_id INT NOT NULL,
+    ativo TINYINT(1) DEFAULT 1, -- 1 para ativo, 0 para inativo
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (professor_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+-- Tabela de Equipes (Times dos Alunos)
+CREATE TABLE equipes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    evento_id INT NOT NULL,
+    ativo TINYINT(1) DEFAULT 1, -- 1 para ativo, 0 para inativo
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE
+);
+
+-- Tabela de Participantes (Alunos e suas Equipes)
+CREATE TABLE participantes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    equipe_id INT NOT NULL,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE CASCADE
+);
+
+-- Tabela de Perguntas
+CREATE TABLE perguntas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    evento_id INT NOT NULL,
+    enunciado TEXT NOT NULL,
+    resposta_correta TEXT NOT NULL,
+    resposta_errada1 TEXT NOT NULL,
+    resposta_errada2 TEXT NOT NULL,
+    resposta_errada3 TEXT NOT NULL,
+    resposta_errada4 TEXT NOT NULL,
+    ativo TINYINT(1) DEFAULT 1, -- 1 para ativo, 0 para inativo
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE
+);
+
+-- Tabela de Respostas dos Alunos
+CREATE TABLE respostas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    pergunta_id INT NOT NULL,
+    resposta_dada VARCHAR(255) NOT NULL,
+    resultado ENUM('correto', 'errado') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (pergunta_id) REFERENCES perguntas(id) ON DELETE CASCADE
+);
+
+-- Tabela de Pontuação das Equipes
+CREATE TABLE pontuacoes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    participante_id INT NOT NULL,
+    evento_id INT NOT NULL,
+    pontos INT DEFAULT 0,
+    UNIQUE KEY (participante_id, evento_id),
+    FOREIGN KEY (participante_id) REFERENCES participantes(id),
+    FOREIGN KEY (evento_id) REFERENCES eventos(id)
+);
+
+-- Tabela de Premiação
+CREATE TABLE premiacoes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    equipe_id INT NOT NULL,
+    fase INT NOT NULL,
+    premio VARCHAR(255) NOT NULL,
+    data_premiacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (equipe_id) REFERENCES equipes(id),
+    UNIQUE KEY (equipe_id, fase) -- Evita duplicação de premiação na mesma fase
+);
+
+-- Tabela de Fases do Quiz
+CREATE TABLE fases (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    evento_id INT NOT NULL,
+    nome_fase VARCHAR(255) NOT NULL,
+    descricao_fase TEXT NOT NULL,
+    premio_fase VARCHAR(255) NOT NULL,
+    ativo TINYINT(1) DEFAULT 1, -- 1 para ativo, 0 para inativo
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE
+);
+
+-- Tabela de Chat (Mensagens no Evento)
+CREATE TABLE chat (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    evento_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+    mensagem TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+-- Tabela de Logs
+CREATE TABLE logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    acao TEXT NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+-- Inserir usuários
+INSERT INTO usuarios (nome, email, senha, tipo, ativo) 
+VALUES 
+('João Silva', 'joao.silva@example.com', 'senha123', 'professor', 1),
+('Maria Oliveira', 'maria.oliveira@example.com', 'senha123', 'aluno', 1),
+('Pedro Santos', 'pedro.santos@example.com', 'senha123', 'aluno', 1);
+
+-- Inserir eventos
+INSERT INTO eventos (nome, professor_id, ativo) 
+VALUES 
+('Quiz de Matemática', 1, 1),
+('Quiz de História', 1, 1);
+
+-- Inserir equipes
+INSERT INTO equipes (nome, evento_id, ativo) 
+VALUES 
+('Equipe A', 1, 1),
+('Equipe B', 1, 1),
+('Equipe C', 2, 1);
+
+-- Inserir participantes (associar alunos às equipes)
+INSERT INTO participantes (usuario_id, equipe_id) 
+VALUES 
+(2, 1), -- Maria Oliveira na Equipe A
+(3, 1), -- Pedro Santos na Equipe A
+(2, 2); -- Maria Oliveira na Equipe B
+
+-- Inserir perguntas
+INSERT INTO perguntas (evento_id, enunciado, resposta_correta, resposta_errada1, resposta_errada2, resposta_errada3, resposta_errada4, ativo) 
+VALUES 
+(1, 'Qual é a soma de 2 + 2?', '4', '3', '5', '6', '7', 1),
+(1, 'Qual é o capital da França?', 'Paris', 'Londres', 'Roma', 'Berlim', 'Madrid', 1);
+
+-- Inserir respostas dos alunos
+INSERT INTO respostas (usuario_id, pergunta_id, resposta_dada, resultado) 
+VALUES 
+(2, 1, '4', 'correto'), -- Maria Oliveira acertou a primeira pergunta
+(3, 1, '5', 'errado'); -- Pedro Santos errou a primeira pergunta
+
+-- Inserir pontuação das equipes
+INSERT INTO pontuacoes (participante_id, evento_id, pontos) 
+VALUES 
+(1, 1, 10), -- Pontuação para o participante (ID 1) no evento de ID 1
+(2, 1, 15); -- Pontuação para o participante (ID 2) no evento de ID 1
+
+-- Inserir premiações
+INSERT INTO premiacoes (equipe_id, fase, premio) 
+VALUES 
+(1, 1, 'Medalha de Ouro'),
+(2, 1, 'Medalha de Prata');
+
+-- Inserir fases
+INSERT INTO fases (evento_id, nome_fase, descricao_fase, premio_fase, ativo) 
+VALUES 
+(1, 'Fase 1', 'Fase inicial do quiz', 'Medalha de Ouro', 1),
+(2, 'Fase 1', 'Primeira fase do quiz de História', 'Medalha de Ouro', 1);
+
+-- Inserir mensagens no chat
+INSERT INTO chat (evento_id, usuario_id, mensagem) 
+VALUES 
+(1, 1, 'Boa sorte a todos!'),
+(2, 2, 'Estou ansioso para o quiz de História.');
+
+-- Inserir logs
+INSERT INTO logs (usuario_id, acao) 
+VALUES 
+(1, 'Criou o evento "Quiz de Matemática"'),
+(2, 'Participou do evento "Quiz de História"');
+
+
+Explicações:
+Usuários: Inserimos três usuários (um professor e dois alunos). As senhas devem ser inseridas com password_hash() em um ambiente real para garantir segurança.
+
+Eventos: Criamos dois eventos, "Quiz de Matemática" e "Quiz de História".
+
+Equipes: Inserimos três equipes, com uma delas associada a um evento.
+
+Participantes: Associamos os alunos às equipes de acordo com a tabela de participantes.
+
+Perguntas: Criamos duas perguntas para o evento de Matemática.
+
+Respostas: Inserimos respostas dos alunos para as perguntas.
+
+Pontuação: Adicionamos pontuação para as equipes com base nos participantes.
+
+Premiações: Criamos premiações para as equipes nas fases do quiz.
+
+Fases: Criamos as fases de um quiz para cada evento.
+
+Chat: Inserimos mensagens no chat de eventos.
+
+Logs: Registramos ações feitas pelos usuários, como criação de eventos e participação.
+
+Com esses inserts, você consegue popular as tabelas com dados iniciais para testar seu sistema.
+
+-- ##########################################################
+sistema de quiz, além da classe Usuario, que já foi criada, as próximas classes devem representar as outras entidades que você tem no banco de dados, como Evento, Equipe, Participante, Pergunta, Resposta, Pontuação, Premiação, Fase, Chat, Log, etc.
+
+A sequência correta de criação das classes segue a ordem das tabelas do banco de dados, já que as relações entre elas são importantes para o correto funcionamento do sistema. Aqui está uma sugestão de sequência:
+
+1. Classe Usuario
+Já criada. Representa os usuários do sistema (professores e alunos).
+
+2. Classe Evento
+Representa um quiz criado por um professor.
+
+3. Classe Equipe
+Representa as equipes dos alunos dentro de um evento.
+
+4. Classe Participante
+Representa o relacionamento entre os alunos e as equipes. Um aluno pode pertencer a várias equipes.
+
+5. Classe Pergunta
+Representa as perguntas de cada evento, associadas ao quiz.
+
+6. Classe Resposta
+Representa as respostas dadas pelos alunos às perguntas. Essa classe também vai armazenar o resultado, se a resposta foi correta ou errada.
+
+7. Classe Pontuação
+Representa a pontuação acumulada pelas equipes com base nas respostas corretas de seus membros.
+
+8. Classe Premiação
+Representa os prêmios que as equipes ganham ao avançarem nas fases ou alcançarem pontuações específicas.
+
+9. Classe Fase
+Representa as fases de um evento de quiz, incluindo a descrição e prêmios das fases.
+
+10. Classe Chat
+Representa as mensagens enviadas pelos usuários durante um evento.
+
+11. Classe Log
+Representa as ações realizadas no sistema para auditoria, como registros de quando um usuário faz algo importante (ex: criação de quiz, envio de resposta).
+
+Ordem Sugerida de Criação das Classes:
+Usuario.php (Já criada) crud ok
+
+Evento.php (Já criada)
+
+Equipe.php (Já criada)
+
+Participante.php (Já criada)
+
+Pergunta.php (Já criada)
+
+Resposta.php (Já criada)
+
+Pontuacao.php (Já criada)
+
+Premiacao.php (Já criada)
+
+Fase.php (Já criada)
+
+Chat.php (Já criada)
+
+Log.php (Já criada)
+
+
+📁 Estrutura do Seu Projeto
+
+/seu_projeto  
+│── /app                # Pasta principal da aplicação  
+│   ├── /assets         # Arquivos estáticos (CSS, JS, imagens)  
+│   │   ├── /css        # Estilos CSS  
+│   │   ├── /js         # Scripts JavaScript  
+│   ├── /classes        # Classes PHP  
+│   │   ├── Usuario.php # Classe para manipular usuários  
+│   │   ├── Game.php    # Classe para gerenciar games  
+│   ├── /DB             # Banco de dados  
+│   │   ├── conexao.php # Conexão com o banco  
+│   │   ├── seeds.sql   # Dados iniciais para popular o BD  
+│   ├── /pages          # Páginas visuais do sistema  
+│   │   ├── login.php          # Página de login  
+│   │   ├── painel_professor.php # Painel do professor  
+│   │   ├── painel_aluno.php  # Painel do aluno  
+│   │   ├── quiz.php          # Página para responder quiz  
+│   │   ├── ranking.php       # Página de ranking de alunos  
+│   ├── /uploads        # Arquivos enviados pelos usuários  
+│── /public             # Arquivos acessíveis diretamente  
+│   ├── index.php       # Página inicial  
+│   ├── .htaccess       # Regras de acesso  
+│── /controllers        # Regras de negócio (processamento)  
+│   ├── loginController.php # Processa login  
+│   ├── gameController.php  # Gerencia games  
+│   ├── usuarioController.php # Gerencia usuários  
+│── /config             # Arquivos de configuração  
+│   ├── sessao.php      # Controle de sessão  
+│   ├── constantes.php  # Definição de constantes  
+│── README.md           # Documentação do projeto  
+
+✅ Explicação de Cada Pasta
+📁 app/
+Pasta principal onde está a aplicação.
+
+assets/ → Armazena os arquivos estáticos (CSS, JS e imagens).
+
+classes/ → Contém as classes do sistema para organizar o código.
+
+DB/ → Conexão com o banco e scripts SQL.
+
+pages/ → Todas as páginas PHP da aplicação, separadas por tipo.
+
+uploads/ → Para armazenar arquivos enviados pelos usuários.
+
+📁 public/
+Pasta pública do sistema, acessada pelo navegador.
+
+index.php → Página inicial que redireciona usuários logados.
+
+.htaccess → Segurança e roteamento de URLs.
+
+📁 controllers/
+Contém os arquivos PHP que processam requisições.
+
+loginController.php → Processa login e autenticação.
+
+gameController.php → Gerencia games e eventos.
+
+usuarioController.php → Cadastro, edição e exclusão de usuários.
+
+📁 config/
+Armazena arquivos de configuração do sistema.
+
+sessao.php → Inicia sessão e protege páginas restritas.
+
+constantes.php → Define variáveis globais, como URL do site.
+
+🔥 Vantagens dessa Estrutura
+✅ Código mais organizado e modular → Facilita manutenção e escalabilidade.
+✅ Separa lógica e apresentação → controllers cuida da lógica, pages exibe os dados.
+✅ Segurança → A conexão com o banco e uploads estão fora do public/, protegendo os dados.
+
+🚀 Conclusão
+Sua estrutura está bem planejada! Apenas ajustei para manter um padrão MVC simplificado. 
+
+
+--------------------------------
+
+📄 Arquivo .htaccess
+
+# Habilitar Rewrite Engine para URLs amigáveis
+RewriteEngine On
+
+# Redirecionar todas as requisições para index.php, exceto arquivos existentes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+
+# Bloquear acesso direto a pastas sensíveis
+<FilesMatch "^(conexao\.php|config\.php|constantes\.php|sessao\.php)">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Proteger diretórios sensíveis
+<Directory "/app/DB">
+    Order Deny,Allow
+    Deny from all
+</Directory>
+
+# Impedir listagem de diretórios
+Options -Indexes
+
+# Proteger uploads para não executarem PHP
+<Directory "/app/uploads">
+    <FilesMatch "\.(php|php5|sh|pl|cgi|exe)$">
+        Order Deny,Allow
+        Deny from all
+    </FilesMatch>
+</Directory>
+
+# Definir index.php como página inicial
+DirectoryIndex index.php
+
+# Proteção contra hotlinking de imagens
+RewriteCond %{HTTP_REFERER} !^$
+RewriteCond %{HTTP_REFERER} !^https://(www\.)?seusite\.com/ [NC]
+RewriteRule \.(jpg|jpeg|png|gif)$ - [F]
+
+# Configuração de cache para melhorar desempenho
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    ExpiresByType application/x-javascript "access plus 1 month"
+</IfModule>
+
+# Compressão Gzip para otimizar carregamento
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+🔥 O que esse .htaccess faz?
+✅ Protege arquivos sensíveis → Bloqueia acesso a conexao.php, config.php etc.
+✅ Impede listagem de diretórios → Evita que usuários vejam arquivos internos.
+✅ Protege a pasta uploads/ → Não permite execução de scripts maliciosos.
+✅ Habilita URLs amigáveis → Remove .php e permite acessar /pagina ao invés de /pagina.php.
+✅ Melhora a performance → Ativa cache e compressão Gzip.
+✅ Impede hotlinking de imagens → Evita que outros sites roubem suas imagens.
