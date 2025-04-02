@@ -1,23 +1,26 @@
 <?php
 session_start();
-require_once '../DB/conexao.php';
+require_once '../../DB/Database.php';
 
 // Verifica se o usuário está logado e se é professor
-if (!isset($_SESSION['usuario_id']) || $_SESSION['tipo'] !== 'professor') {
-    header("Location: login.php");
+if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] != 'professor') {
+    header('Location: ../../index.php'); // Redireciona se não for professor
     exit();
 }
+echo "Bem-vindo, Professor " . htmlspecialchars($_SESSION['usuario_nome']);
 
 // Obtém o ID do professor logado
 $professor_id = $_SESSION['usuario_id'];
 
-// Busca eventos criados pelo professor
-$sql_eventos = "SELECT id, nome FROM eventos WHERE professor_id = ?";
-$stmt = $conn->prepare($sql_eventos);
-$stmt->bind_param("i", $professor_id);
-$stmt->execute();
-$result_eventos = $stmt->get_result();
+// Instancia a classe Database, passando a tabela 'eventos'
+$db = new Database('eventos');
 
+// Monta a query de seleção
+$where = "professor_id = ?";
+$binds = [$professor_id];
+
+// Busca eventos criados pelo professor
+$result_eventos = $db->select($where, null, null, 'id, nome', $binds);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -25,7 +28,7 @@ $result_eventos = $stmt->get_result();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel do Professor</title>
-    <link rel="stylesheet" href="../assest/css/style.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
     <header>
@@ -39,14 +42,14 @@ $result_eventos = $stmt->get_result();
 
     <main>
         <h2>Seus Eventos</h2>
-        <?php if ($result_eventos->num_rows > 0): ?>
+        <?php if (count($result_eventos) > 0): ?>
             <ul>
-                <?php while ($evento = $result_eventos->fetch_assoc()): ?>
+                <?php foreach ($result_eventos as $evento): ?>
                     <li>
                         <strong><?= htmlspecialchars($evento['nome']) ?></strong>
-                        <a href="gerenciar_evento.php?id=<?= $evento['id'] ?>">Gerenciar</a>
+                        <a href="gerenciar_evento.php?id=<?= htmlspecialchars($evento['id']) ?>">Gerenciar</a>
                     </li>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
             </ul>
         <?php else: ?>
             <p>Você ainda não criou nenhum evento.</p>

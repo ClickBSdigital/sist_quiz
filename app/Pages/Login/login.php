@@ -1,66 +1,48 @@
 <?php
 session_start();
-require_once 'db.php'; // Arquivo de conexão com o banco
+require_once '../../DB/Database.php'; // Incluindo a classe Database
 
+// Crie uma instância da classe Database para conectar-se ao banco
+$db = new Database('usuarios'); // 'usuarios' é a tabela que estamos manipulando
+
+// Acesse a conexão através do método getConn()
+$pdo = $db->getConn(); // Aqui você obtém a conexão PDO
+
+// Verifica se o formulário foi enviado
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $email = $_POST['email'];
-    $senha = $_POST['senha'];
+    // Inicializando as variáveis com os dados do formulário
+    $email = trim($_POST['email']);
+    $senha = trim($_POST['senha']);
 
-    // Verifica se o e-mail existe na tabela de usuários
+    // Prepara a consulta para verificar o e-mail e senha
     $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE email = ?");
     $stmt->execute([$email]);
-    $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($usuario && password_verify($senha, $usuario['senha'])) {
-        // Verifica se o usuário está ativo
-        if ($usuario['ativo'] == 1) {
-            // Cria sessão para o usuário
+    // Verifica se o usuário existe
+    if ($stmt->rowCount() > 0) {
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Verifica a senha
+        if (password_verify($senha, $usuario['senha'])) {
+            // Cria as variáveis de sessão
             $_SESSION['usuario_id'] = $usuario['id'];
             $_SESSION['usuario_nome'] = $usuario['nome'];
             $_SESSION['usuario_email'] = $usuario['email'];
             $_SESSION['usuario_tipo'] = $usuario['tipo'];
 
-            // Redireciona o usuário para o painel correto
+            // Redireciona o usuário com base no tipo
             if ($usuario['tipo'] == 'professor') {
-                header('Location: painel_professor.php');
-                exit();
+                header('Location: ../../Pages/Login/painel_professor.php');
             } else {
-                header('Location: painel_aluno.php');
-                exit();
+                header('Location: ../../Pages/Login/painel_aluno.php');
             }
+            exit();
         } else {
-            $erro = "Sua conta está inativa. Por favor, entre em contato com o administrador.";
+            echo "Senha incorreta!";
         }
     } else {
-        $erro = "E-mail ou senha inválidos!";
+        echo "E-mail não encontrado!";
     }
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Quiz</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="login-container">
-        <h2>Login</h2>
-        <?php if (isset($erro)): ?>
-            <p class="erro"><?php echo $erro; ?></p>
-        <?php endif; ?>
-        <form action="login.php" method="POST">
-            <label for="email">E-mail:</label>
-            <input type="email" name="email" id="email" required>
-            
-            <label for="senha">Senha:</label>
-            <input type="password" name="senha" id="senha" required>
-            
-            <button type="submit">Entrar</button>
-        </form>
-        <p><a href="recuperar_senha.php">Esqueceu a senha?</a></p>
-    </div>
-</body>
-</html>

@@ -1,12 +1,13 @@
 <?php
 session_start();
-require_once '../DB/conexao.php';
+require_once '../../DB/Database.php';
 
 // Verifica se o usuário está logado e se é aluno
-if (!isset($_SESSION['usuario_id']) || $_SESSION['tipo'] !== 'aluno') {
-    header("Location: login.php");
+if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] != 'aluno') {
+    header('Location: ../../index.php'); // Redireciona se não for aluno
     exit();
 }
+echo "Bem-vindo, Aluno " . htmlspecialchars($_SESSION['usuario_nome']);
 
 // Obtém o ID do aluno logado
 $aluno_id = $_SESSION['usuario_id'];
@@ -14,7 +15,8 @@ $aluno_id = $_SESSION['usuario_id'];
 // Busca eventos disponíveis
 $sql_eventos = "SELECT e.id, e.nome 
                 FROM eventos e
-                JOIN participantes p ON e.id = p.equipe_id
+                JOIN equipes eq ON e.id = eq.evento_id
+                JOIN participantes p ON eq.id = p.equipe_id
                 WHERE p.usuario_id = ?";
 $stmt = $conn->prepare($sql_eventos);
 $stmt->bind_param("i", $aluno_id);
@@ -36,7 +38,7 @@ $pontuacao = $result_pontuacao->fetch_assoc()['total_pontos'] ?? 0;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel do Aluno</title>
-    <link rel="stylesheet" href="../assest/css/style.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
     <header>
@@ -55,7 +57,7 @@ $pontuacao = $result_pontuacao->fetch_assoc()['total_pontos'] ?? 0;
                 <?php while ($evento = $result_eventos->fetch_assoc()): ?>
                     <li>
                         <strong><?= htmlspecialchars($evento['nome']) ?></strong>
-                        <a href="participar_evento.php?id=<?= $evento['id'] ?>">Participar</a>
+                        <a href="participar_evento.php?id=<?= htmlspecialchars($evento['id']) ?>">Participar</a>
                     </li>
                 <?php endwhile; ?>
             </ul>

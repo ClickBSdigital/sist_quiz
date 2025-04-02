@@ -1,0 +1,49 @@
+footer {
+  background: linear-gradient(135deg, #000000, #5a007a, #ff1493); /* Preto, roxo e rosa */
+  color: #fff; /* Texto branco para contraste */
+  padding: 30px 0;
+}
+
+footer a {
+  color: #ff66b2; /* Rosa claro */
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+footer a:hover {
+  color: #ff1493; /* Rosa neon */
+}
+
+footer .nav_footer-link {
+  color: #ffffff;
+  padding: 5px 0;
+  font-size: 18px;
+}
+
+footer .nav_footer-link:hover {
+  color: #ff66b2;
+}
+
+footer p {
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+footer .nav_footer i {
+  color: #ffffff;
+  margin-right: 15px;
+  transition: transform 0.3s, color 0.3s;
+}
+
+footer .nav_footer i:hover {
+  transform: scale(1.2);
+  color: #ff1493;
+}
+
+footer .text-center {
+  background: #222; /* Preto escuro */
+  padding: 15px;
+  font-size: 14px;
+  opacity: 0.9;
+}
