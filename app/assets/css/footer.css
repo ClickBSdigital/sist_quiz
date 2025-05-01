@@ -47,3 +47,30 @@ footer .text-center {
   font-size: 14px;
   opacity: 0.9;
 }
+
+.nav_footer {
+  display: flex; /* Deixa os itens em linha */
+  justify-content: center; /* Centraliza horizontalmente */
+  gap: 15px; /* Espaço entre os ícones */
+  list-style: none; /* Remove os marcadores da lista */
+  padding: 0;
+  margin: 0;
+}
+
+.nav_footer-link i {
+  transition: transform 0.3s ease-in-out; /* Efeito de hover suave */
+}
+
+.nav_footer-link i:hover {
+  transform: scale(1.2); /* Aumenta um pouco ao passar o mouse */
+}
+
+/* Cores específicas para cada mídia */
+.nav_footer-link i.fa-facebook { color: #1877F2; }  /* Azul do Facebook */
+.nav_footer-link i.fa-instagram { 
+  background: linear-gradient(45deg, #833AB4, #E1306C, #F77737); 
+  -webkit-background-clip: text;
+  color: transparent;
+} /* Degradê do Instagram */
+.nav_footer-link i.fa-twitter { color: #1DA1F2; } /* Azul do Twitter */
+.nav_footer-link i.fa-whatsapp { color: #25D366; } /* Verde do WhatsApp */

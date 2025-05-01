@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Armería Forasteiro</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #000000;
+      color: #FFFFFF;
+    }
+    .navbar {
+      background-color: #E10600;
+    }
+    .btn-forasteiro {
+      background-color: #E10600;
+      color: white;
+      border: none;
+    }
+    .btn-forasteiro:hover {
+      background-color: #FF2A2A;
+    }
+    .card-custom {
+      background-color: #1A1A1A;
+      border: 1px solid #C0C0C0;
+    }
+    .logo-text {
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: bold;
+      font-size: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand logo-text" href="#">Forasteiro</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link text-white" href="#">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white" href="#">Jogadores</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white" href="#">Eventos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white" href="#">Loja</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-5">
+    <div class="text-center mb-5">
+      <h1 class="logo-text">Armería Forasteiro</h1>
+      <p class="text-muted">Airsoft. Manutenção. Missão cumprida.</p>
+      <a href="#" class="btn btn-forasteiro">Cadastre-se no próximo evento</a>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card card-custom p-3">
+          <h5>Próximos Eventos</h5>
+          <p>Participe dos games mais insanos da sua região!</p>
+          <a href="#" class="btn btn-forasteiro btn-sm">Ver eventos</a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card card-custom p-3">
+          <h5>Ranking de Equipes</h5>
+          <p>Acompanhe a pontuação das equipes em tempo real.</p>
+          <a href="#" class="btn btn-forasteiro btn-sm">Ver ranking</a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card card-custom p-3">
+          <h5>Loja</h5>
+          <p>Equipamentos, peças e alvos inteligentes para venda.</p>
+          <a href="#" class="btn btn-forasteiro btn-sm">Acessar loja</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  import React from "react";
+  import { Card, CardContent } from "@/components/ui/card";
+  import { Button } from "@/components/ui/button";
+  import { Sparkles, Target, Store } from "lucide-react";
+  import { motion } from "framer-motion";
+  
+  export default function HomePage() {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-red-900 text-white font-sans">
+        <nav className="flex items-center justify-between px-6 py-4 bg-black bg-opacity-80 shadow-md">
+          <h1 className="text-2xl font-bold text-red-600">Armería Forasteiro</h1>
+          <div className="space-x-4">
+            <Button variant="ghost">Início</Button>
+            <Button variant="ghost">Eventos</Button>
+            <Button variant="ghost">Equipes</Button>
+            <Button variant="ghost">Loja</Button>
+            <Button variant="ghost">Contato</Button>
+          </div>
+        </nav>
+  
+        <header className="text-center py-20 px-4 bg-gradient-to-r from-red-600 via-white to-black">
+          <motion.h2 
+            initial={{ opacity: 0, y: -20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 1 }}
+            className="text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-black via-red-600 to-gray-800"
+          >
+            Prepare-se para a batalha!
+          </motion.h2>
+          <p className="mt-4 text-xl text-black font-semibold">
+            Cadastre sua equipe, participe de eventos e mostre quem domina o campo.
+          </p>
+          <Button className="mt-6 bg-red-700 hover:bg-red-800 text-white px-6 py-3 rounded-xl shadow-lg">
+            Ver próximos eventos
+          </Button>
+        </header>
+  
+        <main className="grid grid-cols-1 md:grid-cols-3 gap-6 px-6 py-16">
+          <Card className="bg-white text-black shadow-xl rounded-2xl border-none">
+            <CardContent className="p-6">
+              <Target className="text-red-600 w-8 h-8 mb-4" />
+              <h3 className="text-xl font-bold mb-2">Próximos Combates</h3>
+              <p>Confira os eventos em sua cidade e inscreva-se!</p>
+            </CardContent>
+          </Card>
+  
+          <Card className="bg-white text-black shadow-xl rounded-2xl border-none">
+            <CardContent className="p-6">
+              <Sparkles className="text-red-600 w-8 h-8 mb-4" />
+              <h3 className="text-xl font-bold mb-2">Ranking de Equipes</h3>
+              <p>Veja quem está dominando os jogos e desafie-os!</p>
+            </CardContent>
+          </Card>
+  
+          <Card className="bg-white text-black shadow-xl rounded-2xl border-none">
+            <CardContent className="p-6">
+              <Store className="text-red-600 w-8 h-8 mb-4" />
+              <h3 className="text-xl font-bold mb-2">Loja de Airsoft</h3>
+              <p>Compre equipamentos, alvos inteligentes e acessórios exclusivos.</p>
+            </CardContent>
+          </Card>
+        </main>
+  
+        <footer className="bg-black bg-opacity-80 py-6 text-center text-white border-t border-red-800">
+          <p>&copy; 2025 Armería Forasteiro Airsoft - Campo Grande - MS</p>
+          <p>Rua Alagoas 1116 · Jardim dos Estados · (67) 99299-7470</p>
+        </footer>
+      </div>
+    );
+  }
+  
+  <footer class="text-center text-muted py-4">
+    <p>© 2025 Armería Forasteiro - Campo Grande, MS</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

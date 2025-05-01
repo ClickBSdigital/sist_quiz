@@ -68,10 +68,11 @@ class Database {
     }
 
     public function select_by_id($where, $fields = '*', $binds = []) {
-        // Selecione um único item baseado no id
         $query = "SELECT " . $fields . " FROM " . $this->table . " WHERE " . $where;
-        return $this->execute($query, $binds)->fetch(PDO::FETCH_ASSOC);
+        $stmt = $this->execute($query, $binds);
+        return $stmt ? $stmt->fetch(PDO::FETCH_ASSOC) : null;
     }
+    
 
     public function delete($where, $binds = []) {
         // Deleta com base na condição fornecida
@@ -85,22 +86,23 @@ class Database {
         if (empty($array)) {
             die("Os valores para atualização não podem ser vazios.");
         }
-
+    
         $fields = array_keys($array);
         $values = array_values($array);
         $query = "UPDATE " . $this->table . " SET ";
-
+    
         // Monta a query com base nos campos e valores
         foreach ($fields as $field) {
-            $query .= $field . " = ?, ";
+            $query .= "$field = ?, ";
         }
         $query = rtrim($query, ", ");  // Remove a última vírgula
         $query .= " WHERE " . $where;
-
+    
         // Combina os valores do array com os binds adicionais
         $stmt = $this->execute($query, array_merge($values, $binds));
+    
+        // Retorno corrigido
         return $stmt->rowCount() > 0;
     }
+    
 }
-
-?>

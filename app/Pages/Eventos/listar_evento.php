@@ -1,16 +1,19 @@
 <?php
-require './app/DB/Database.php';
+require_once '../../DB/Database.php';
+include('../../Pages/view/navbar.php');
 
-$sql = 'SELECT eventos.id, eventos.nome, usuarios.nome AS professor, eventos.created_at, eventos.ativo 
-        FROM eventos
-        JOIN usuarios ON eventos.professor_id = usuarios.id';
-$eventos = mysqli_query($conexao, $sql);
+$db = new Database('eventos');
+$query = "SELECT eventos.id, eventos.nome, usuarios.nome AS professor, eventos.created_at, eventos.ativo 
+          FROM eventos
+          JOIN usuarios ON eventos.professor_id = usuarios.id";
+$eventos = $db->execute($query)->fetchAll(PDO::FETCH_ASSOC);
 ?>
-<!doctype html>
-<html lang="pt">
+
+<!DOCTYPE html>
+<html lang="pt-br">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Eventos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -29,15 +32,15 @@ $eventos = mysqli_query($conexao, $sql);
                 </tr>
             </thead>
             <tbody>
-                <?php while ($evento = mysqli_fetch_assoc($eventos)) { ?>
+                <?php foreach ($eventos as $evento) { ?>
                     <tr>
-                        <td><?= $evento['id'] ?></td>
-                        <td><?= $evento['nome'] ?></td>
-                        <td><?= $evento['professor'] ?></td>
+                        <td><?= htmlspecialchars($evento['id']) ?></td>
+                        <td><?= htmlspecialchars($evento['nome']) ?></td>
+                        <td><?= htmlspecialchars($evento['professor']) ?></td>
                         <td><?= date('d/m/Y H:i', strtotime($evento['created_at'])) ?></td>
                         <td><?= $evento['ativo'] ? 'Ativo' : 'Inativo' ?></td>
                         <td>
-                            <a href="editar_evento.php?id=<?= $evento['id'] ?>" class="btn btn-success btn-sm">Editar</a>
+                            <a href="editar_eventos.php?id=<?= $evento['id'] ?>" class="btn btn-success btn-sm">Editar</a>
                             <form action="inativar_evento.php" method="POST" class="d-inline">
                                 <input type="hidden" name="id" value="<?= $evento['id'] ?>">
                                 <button type="submit" class="btn btn-danger btn-sm">Inativar</button>
@@ -47,6 +50,7 @@ $eventos = mysqli_query($conexao, $sql);
                 <?php } ?>
             </tbody>
         </table>
+        <a href="index_evento.php" class="btn btn-primary">Voltar</a>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
